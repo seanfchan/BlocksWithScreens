@@ -1,4 +1,4 @@
-package com.blockchainwithscreens.model.openweather
+package model.thirdparty.openweather
 
 data class WeatherMain(val temp: Float,
                        val pressure: Int,

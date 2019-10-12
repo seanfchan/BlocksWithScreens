@@ -1,4 +1,4 @@
-package com.blockchainwithscreens.model.openweather
+package model.thirdparty.openweather
 
 data class Weather(val id: Int,
                    val main: String,

@@ -1,31 +1,35 @@
-package com.blockchainwithscreens
+package com.blockswithscreens
 
-import com.blockchainwithscreens.model.OpenWeatherZipCodeResponse
-import com.blockchainwithscreens.model.Secrets
+import ENVCONSTANTS
 import com.blockchainwithscreens.model.weather.WeatherZipCodeResponse
 import com.google.gson.Gson
 import com.google.gson.JsonParser
-import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.routing.*
-import io.ktor.http.*
-import kotlinx.html.*
-import kotlinx.css.*
-import io.ktor.client.*
-import io.ktor.client.engine.apache.*
-import io.ktor.client.features.json.*
-import io.ktor.client.request.*
-import io.ktor.features.ContentNegotiation
-import io.ktor.http.ContentDisposition.Companion.File
+import io.ktor.application.Application
+import io.ktor.application.ApplicationCall
+import io.ktor.application.call
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.apache.Apache
+import io.ktor.client.features.json.GsonSerializer
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.request.get
+import io.ktor.http.ContentType
 import io.ktor.http.content.files
 import io.ktor.http.content.static
 import io.ktor.http.content.staticRootFolder
-import kotlinx.coroutines.*
+import io.ktor.response.respondText
+import io.ktor.routing.*
+import kotlinx.coroutines.runBlocking
+import kotlinx.css.CSSBuilder
+import kotlinx.html.CommonAttributeGroupFacade
+import kotlinx.html.FlowOrMetaDataContent
+import kotlinx.html.style
 import model.stocks.StockResponse
 import model.thirdparty.alphavantage.MetaData
 import model.thirdparty.alphavantage.TimeSeriesDaily
+import model.thirdparty.openweather.OpenWeatherZipCodeResponse
 import java.io.File
 import java.util.concurrent.TimeUnit
+import kotlin.collections.set
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -69,7 +73,7 @@ fun Application.module(testing: Boolean = false) {
                     }
                 }
 
-                val url = "http://api.openweathermap.org/data/2.5/weather?zip=$zipcodeParam,us&appid=${Secrets.OPEN_WEATHER_API_KEY}"
+                val url = "http://api.openweathermap.org/data/2.5/weather?zip=$zipcodeParam,us&appid=${System.getenv(ENVCONSTANTS.OPEN_WEATHER_API_KEY)}"
                 val openWeatherResponse = client.get<String>(url)
                 val weather = gson.fromJson(openWeatherResponse, OpenWeatherZipCodeResponse::class.java)
                 val weatherDescriptions = weather.weather[0]
@@ -103,7 +107,7 @@ fun Application.module(testing: Boolean = false) {
                     }
                 }
 
-                val url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=$symbol&apikey=${Secrets.ALPHAV_API_KEY}"
+                val url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=$symbol&apikey=${System.getenv(ENVCONSTANTS.ALPHAV_API_KEY)}"
                 val alphaVantageResponse = client.get<String>(url)
                 val jsonElement = JsonParser()
                 val stockJsonObject = jsonElement.parse(alphaVantageResponse)?.asJsonObject
